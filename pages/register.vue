@@ -52,7 +52,7 @@ const submit = () => {};
         <v-btn class="mt-2 bg-blue" type="submit" block>สมัครสมาชิก</v-btn>
       </v-form>
       <v-card-text class="text-center">
-        <p>มีบัญชีอยู่แล้ว? <a href="/login">เข้าสู่ระบบ</a></p>
+        <p>มีบัญชีอยู่แล้ว? <NuxtLink to="/login">เข้าสู่ระบบ</NuxtLink></p>
       </v-card-text>
     </v-card>
   </v-container>

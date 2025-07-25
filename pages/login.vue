@@ -3,9 +3,7 @@ const username = ref('');
 const password = ref('');
 
 const submit = () => {
-  if (username.value && password.value) {
-    console.log(username.value, password.value);
-  }
+  navigateTo('/');
 };
 </script>
 <template>
@@ -43,7 +41,7 @@ const submit = () => {
         <v-btn class="mt-2 bg-blue" type="submit" block>เข้าสู่ระบบ</v-btn>
       </v-form>
       <v-card-text class="text-center">
-        <p>ยังไม่มีบัญชี? <a href="/register">สมัครสมาชิก </a></p>
+        <p>ยังไม่มีบัญชี? <NuxtLink to="/register">สมัครสมาชิก </NuxtLink></p>
       </v-card-text>
     </v-card>
   </v-container>
