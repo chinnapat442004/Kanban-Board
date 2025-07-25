@@ -138,31 +138,54 @@ const {
 
               <v-card
                 v-show="addTask[column.id]"
-                class="mx-auto my-4 hover-card"
+                class="mx-auto my-4"
                 style="
-                  border: 1px solid #e0e0e0;
+                  border: 2px solid #a0a8b0;
                   box-shadow: none;
                   border-radius: 10px;
-                  background-color: #e0e0e0;
+                  background-color: #f2f4f7;
                 "
               >
                 <v-card-item>
                   <v-text-field
-                    placeholder="Card title"
+                    placeholder="เพิ่มชื่อ Task"
                     type="text"
                     variant="plain"
+                    hide-details
                   />
+                  <div>
+                    <v-btn
+                      prepend-icon="mdi-account"
+                      width="100%"
+                      style="box-shadow: none; background-color: #f2f4f7"
+                      class="justify-start px-2"
+                      >เพิ่มผู้รับผิดชอบ</v-btn
+                    >
+                  </div>
+                  <div>
+                    <v-btn
+                      prepend-icon="mdi-tag"
+                      width="100%"
+                      style="box-shadow: none; background-color: #f2f4f7"
+                      class="justify-start px-2"
+                      >เพิ่ม Tag</v-btn
+                    >
+                  </div>
                 </v-card-item>
 
                 <v-card-actions class="d-flex justify-end">
                   <v-btn
                     @click="closeAddTask(column.id)"
                     variant="text"
-                    color="red"
+                    class="bg-red-lighten-2"
                     text="ยกเลิก"
                   ></v-btn>
 
-                  <v-btn variant="text" color="green" text="บันทึก"></v-btn>
+                  <v-btn
+                    variant="text"
+                    class="bg-green-lighten-1"
+                    text="บันทึก"
+                  ></v-btn>
                 </v-card-actions>
               </v-card>
             </v-card-text>
@@ -209,14 +232,14 @@ const {
               <v-btn
                 @click="closeAddColumn()"
                 variant="text"
-                color="red"
+                class="bg-red-lighten-2"
                 text="ยกเลิก"
               ></v-btn>
 
               <v-btn
                 @click="addNewColumn(columnName)"
                 variant="text"
-                color="green"
+                class="bg-green-lighten-1"
                 text="บันทึก"
               ></v-btn>
             </v-card-actions> </v-card
