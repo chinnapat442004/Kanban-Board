@@ -1,82 +1,14 @@
 <script setup lang="ts">
-import type { Column } from '~/types/Column';
-
-const addTask = ref<{ [key: number]: boolean }>({});
-
-const openAddTask = (columnId: number) => {
-  addTask.value[columnId] = true;
-};
-
-const closeAddTask = (columnId: number) => {
-  addTask.value[columnId] = false;
-};
-
-const columns = ref<Column[]>([
-  {
-    id: 1,
-    name: 'To Do',
-    tasks: [{ id: 1, title: 'Design Homepage', tags: ['UI', 'UX'] }],
-  },
-  {
-    id: 2,
-    name: 'In Progress',
-    tasks: [
-      { id: 2, title: 'Setup Database', tags: ['DB'] },
-      { id: 3, title: 'Create API Endpoints', tags: ['Backend'] },
-    ],
-  },
-]);
-
-const removeTask = (columnId: number, taskId: number) => {
-  console.log(columnId, taskId);
-  const column = columns.value.find((col) => col.id === columnId);
-  if (column) {
-    column.tasks = column.tasks.filter((task) => task.id !== taskId);
-  }
-};
-
-const removeColumn = (columnId: number) => {
-  columns.value = columns.value.filter((col) => col.id !== columnId);
-};
-
-const startDrag = (event: DragEvent, item: any) => {
-  if (event.dataTransfer) {
-    event.dataTransfer.dropEffect = 'move';
-    event.dataTransfer.effectAllowed = 'move';
-    event.dataTransfer.setData('itemId', item.id.toString());
-
-    const target = event.target as HTMLElement;
-    const clone = target.cloneNode(true) as HTMLElement;
-
-    clone.style.position = 'absolute';
-    // clone.style.opacity = '1';
-    document.body.appendChild(clone);
-    event.dataTransfer.setDragImage(clone, 0, 0);
-  }
-};
-
-const onDrop = (event: DragEvent, targetColumn: any) => {
-  const itemId = Number(event.dataTransfer?.getData('itemId'));
-  if (!itemId) return;
-
-  let sourceColumnIndex = -1;
-  let taskToMove: any = null;
-
-  for (let i = 0; i < columns.value.length; i++) {
-    const taskIndex = columns.value[i]!.tasks.findIndex(
-      (task: any) => task.id === itemId
-    );
-    if (taskIndex !== -1) {
-      sourceColumnIndex = i;
-      taskToMove = columns.value[i]!.tasks.splice(taskIndex, 1)[0];
-      break;
-    }
-  }
-
-  if (taskToMove && targetColumn.tasks) {
-    targetColumn.tasks.push(taskToMove);
-  }
-};
+const {
+  columns,
+  addTask,
+  openAddTask,
+  closeAddTask,
+  removeTask,
+  removeColumn,
+  startDrag,
+  onDrop,
+} = useBoard();
 </script>
 
 <template>
