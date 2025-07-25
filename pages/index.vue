@@ -2,12 +2,17 @@
 const {
   columns,
   addTask,
+  addColumn,
+  columnName,
   openAddTask,
+  showAddColumn,
   closeAddTask,
   removeTask,
   removeColumn,
   startDrag,
   onDrop,
+  closeAddColumn,
+  addNewColumn,
 } = useBoard();
 </script>
 
@@ -19,6 +24,7 @@ const {
         class="bg-blue-lighten-3 me-2 text-none"
         prepend-icon="mdi-plus"
         variant="flat"
+        @click="showAddColumn()"
         >Add Column</v-btn
       >
 
@@ -178,6 +184,43 @@ const {
             >
           </v-card>
         </v-col>
+        <v-col cols="3" v-if="addColumn">
+          <v-card
+            style="
+              border-radius: 10px;
+              box-shadow: none;
+              border: 1px solid #e0e0e0;
+            "
+            ><v-card-title
+              class="d-flex flex-column align-start"
+              style="border-bottom: 1px solid #e0e0e0"
+            >
+              <div class="d-flex align-center w-100">
+                <v-text-field
+                  placeholder="เพิ่มคอลัมน์ใหม่"
+                  type="text"
+                  variant="plain"
+                  hide-details
+                  v-model="columnName"
+                /></div
+            ></v-card-title>
+
+            <v-card-actions class="d-flex justify-end">
+              <v-btn
+                @click="closeAddColumn()"
+                variant="text"
+                color="red"
+                text="ยกเลิก"
+              ></v-btn>
+
+              <v-btn
+                @click="addNewColumn(columnName)"
+                variant="text"
+                color="green"
+                text="บันทึก"
+              ></v-btn>
+            </v-card-actions> </v-card
+        ></v-col>
       </v-row>
     </div>
   </v-main>
@@ -191,5 +234,10 @@ const {
 .hover-card:hover {
   border: 1px solid black;
   background-color: #efefef;
+}
+
+.v-text-field >>> input {
+  font-size: 20px;
+  padding: 0px !important;
 }
 </style>

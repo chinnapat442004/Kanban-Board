@@ -5,6 +5,8 @@ import type { Column } from '~/types/Column';
 export function useBoard() {
   const columns = ref<Column[]>([...mockColumns]);
   const addTask = ref<{ [key: number]: boolean }>({});
+  const addColumn = ref(false);
+  const columnName = ref('');
 
   const openAddTask = (columnId: number) => {
     addTask.value[columnId] = true;
@@ -58,14 +60,39 @@ export function useBoard() {
     }
   };
 
+  const showAddColumn = () => {
+    addColumn.value = true;
+  };
+
+  const closeAddColumn = () => {
+    addColumn.value = false;
+    columnName.value = '';
+  };
+
+  const addNewColumn = (name: string) => {
+    const newColumn: Column = {
+      id: columns.value.length + 1,
+      name,
+      tasks: [],
+    };
+    columns.value.push(newColumn);
+    addColumn.value = false;
+    columnName.value = '';
+  };
+
   return {
     columns,
     addTask,
+    addColumn,
+    columnName,
     openAddTask,
+    showAddColumn,
     closeAddTask,
     removeTask,
     removeColumn,
     startDrag,
     onDrop,
+    closeAddColumn,
+    addNewColumn,
   };
 }
