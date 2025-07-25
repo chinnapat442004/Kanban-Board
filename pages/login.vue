@@ -1,9 +1,14 @@
 <script setup lang="ts">
+import { useAuth } from '@/composables/useAuth';
+
+const { userLogin, login } = useAuth();
 const username = ref('');
 const password = ref('');
 
+const visible = ref(false);
+
 const submit = () => {
-  navigateTo('/');
+  login(username.value, password.value);
 };
 </script>
 <template>
@@ -25,17 +30,23 @@ const submit = () => {
         <p>Login</p>
       </v-card-text>
       <v-form fast-fail @submit.prevent @submit="submit">
+        <div class="text-subtitle-1 text-medium-emphasis">Username</div>
         <v-text-field
           v-model="username"
+          :rules="[(v) => !!v || 'กรุณากรอกชื่อผู้ใช้']"
           placeholder="Username"
           variant="outlined"
         ></v-text-field>
+        <div class="text-subtitle-1 text-medium-emphasis">Password</div>
 
         <v-text-field
+          :append-inner-icon="visible ? 'mdi-eye-off' : 'mdi-eye'"
+          :type="visible ? 'text' : 'password'"
           v-model="password"
+          :rules="[(v) => !!v || 'กรุณากรอกรหัสผ่าน']"
           placeholder="Password"
-          type="password"
           variant="outlined"
+          @click:append-inner="visible = !visible"
         ></v-text-field>
 
         <v-btn class="mt-2 bg-blue" type="submit" block>เข้าสู่ระบบ</v-btn>
