@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { Column } from '~/types/Column';
+
 const addTask = ref<{ [key: number]: boolean }>({});
 
 const openAddTask = (columnId: number) => {
@@ -9,7 +11,7 @@ const closeAddTask = (columnId: number) => {
   addTask.value[columnId] = false;
 };
 
-const columns = ref([
+const columns = ref<Column[]>([
   {
     id: 1,
     name: 'To Do',
@@ -36,6 +38,45 @@ const removeTask = (columnId: number, taskId: number) => {
 const removeColumn = (columnId: number) => {
   columns.value = columns.value.filter((col) => col.id !== columnId);
 };
+
+const startDrag = (event: DragEvent, item: any) => {
+  if (event.dataTransfer) {
+    event.dataTransfer.dropEffect = 'move';
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('itemId', item.id.toString());
+
+    const target = event.target as HTMLElement;
+    const clone = target.cloneNode(true) as HTMLElement;
+
+    clone.style.position = 'absolute';
+    // clone.style.opacity = '1';
+    document.body.appendChild(clone);
+    event.dataTransfer.setDragImage(clone, 0, 0);
+  }
+};
+
+const onDrop = (event: DragEvent, targetColumn: any) => {
+  const itemId = Number(event.dataTransfer?.getData('itemId'));
+  if (!itemId) return;
+
+  let sourceColumnIndex = -1;
+  let taskToMove: any = null;
+
+  for (let i = 0; i < columns.value.length; i++) {
+    const taskIndex = columns.value[i]!.tasks.findIndex(
+      (task: any) => task.id === itemId
+    );
+    if (taskIndex !== -1) {
+      sourceColumnIndex = i;
+      taskToMove = columns.value[i]!.tasks.splice(taskIndex, 1)[0];
+      break;
+    }
+  }
+
+  if (taskToMove && targetColumn.tasks) {
+    targetColumn.tasks.push(taskToMove);
+  }
+};
 </script>
 
 <template>
@@ -50,7 +91,14 @@ const removeColumn = (columnId: number) => {
       >
 
       <v-row justify="start" class="py-4">
-        <v-col v-for="column in columns" :key="column.id" cols="3">
+        <v-col
+          v-for="column in columns"
+          :key="column.id"
+          cols="3"
+          @drop="onDrop($event, column)"
+          @dragover.prevent
+          @dragenter.prevent
+        >
           <v-card
             style="
               border-radius: 10px;
@@ -100,6 +148,8 @@ const removeColumn = (columnId: number) => {
               >
                 <v-hover v-slot="{ isHovering, props }">
                   <v-card
+                    draggable="true"
+                    @dragstart="startDrag($event, item)"
                     v-bind="props"
                     class="hover-card"
                     style="
