@@ -26,7 +26,7 @@ export const mockBoards: Board[] = [
     id: 2,
     name: 'Project 2',
     ownerId: 2,
-    members: [1],
+    members: [2],
     columns: [
       {
         id: 1,

@@ -1,10 +1,15 @@
-import { user } from '~/mock/users';
+// stores/auth.ts
+import { defineStore } from 'pinia';
+import { ref } from 'vue';
+import { users } from '~/mock/users';
 import type { User } from '~/types/User';
+import { useRouter } from 'vue-router';
 
-export function useAuth() {
+export const useAuthStore = defineStore('auth', () => {
   const userLogin = ref<User | null>(null);
+  const router = useRouter();
 
-  const getUser = () => {
+  const getUser = async () => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       userLogin.value = JSON.parse(storedUser);
@@ -12,22 +17,26 @@ export function useAuth() {
   };
 
   const login = async (username: string, password: string) => {
-    const foundUser = user.find(
+    const foundUser = users.find(
       (u) => u.username === username && u.password === password
     );
     if (foundUser) {
       localStorage.setItem('user', JSON.stringify(foundUser));
-      getUser();
-      console.log(userLogin.value);
-      navigateTo('/');
+      userLogin.value = foundUser;
+      router.push('/');
     }
   };
 
   const logout = () => {
     localStorage.removeItem('user');
     userLogin.value = null;
-    navigateTo('/login');
+    router.push('/login');
   };
 
-  return { userLogin, login, logout, getUser };
-}
+  return {
+    userLogin,
+    getUser,
+    login,
+    logout,
+  };
+});

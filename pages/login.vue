@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { useAuth } from '@/composables/useAuth';
+import { useAuthStore } from '#imports';
 
-const { userLogin, login } = useAuth();
+const authStore = useAuthStore();
 const username = ref('');
 const password = ref('');
 
 const visible = ref(false);
 
 const submit = () => {
-  login(username.value, password.value);
+  authStore.login(username.value, password.value);
 };
 </script>
 <template>

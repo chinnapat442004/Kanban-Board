@@ -2,17 +2,26 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { mockBoards } from '~/mock/boards';
 
-import { useAuth } from '@/composables/useAuth';
+import { useAuthStore } from '#imports';
 import type { Board } from '~/types/Board';
+import { users } from '~/mock/users';
 
 export const useBoardStore = defineStore('board', () => {
-  const { userLogin, getUser } = useAuth();
+  const authStore = useAuthStore();
 
   const allBoards = ref<Board[]>([...mockBoards]);
+
   const selectedBoardId = ref<number | null>(null);
 
   const addColumn = ref(false);
   const columnName = ref('');
+
+  const userBoards = computed(() => {
+    const userId = authStore.userLogin?.id;
+    if (!userId) return [];
+    return allBoards.value.filter((board) => board.members.includes(userId));
+  });
+
   const columns = computed({
     get() {
       const board = userBoards.value.find(
@@ -26,12 +35,6 @@ export const useBoardStore = defineStore('board', () => {
       );
       if (board) board.columns = newColumns;
     },
-  });
-
-  const userBoards = computed(() => {
-    const userId = userLogin.value?.id;
-    if (!userId) return [];
-    return allBoards.value.filter((board) => board.members.includes(userId));
   });
 
   function removeTask(columnId: number, taskId: number) {
@@ -54,8 +57,9 @@ export const useBoardStore = defineStore('board', () => {
     },
     { immediate: true }
   );
+
   onMounted(async () => {
-    await getUser();
+    await authStore.getUser();
     if (userBoards.value.length > 0) {
       selectedBoardId.value = userBoards.value[0]!.id;
     }
@@ -66,6 +70,29 @@ export const useBoardStore = defineStore('board', () => {
     columnName.value = '';
   }
 
+  const findUserIdByEmail = (email: string): number | null => {
+    console.log(email);
+    const user = users.find((u) => u.email === email.trim());
+    return user ? user.id : null;
+  };
+
+  const addBoard = (name: string, otherMembers: number[] = []) => {
+    if (!authStore.userLogin) {
+      throw new Error();
+    }
+    const ownerId = authStore.userLogin?.id;
+
+    const newBoard: Board = {
+      id: allBoards.value.length + 1,
+      name: name,
+      ownerId: ownerId,
+      members: [ownerId, ...otherMembers],
+      columns: [],
+    };
+
+    allBoards.value.push(newBoard);
+  };
+
   return {
     allBoards,
     userBoards,
@@ -73,8 +100,10 @@ export const useBoardStore = defineStore('board', () => {
     columns,
     addColumn,
     columnName,
+    findUserIdByEmail,
     closeAddColumn,
     removeTask,
     removeColumn,
+    addBoard,
   };
 });
