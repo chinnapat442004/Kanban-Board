@@ -6,10 +6,25 @@ const username = ref('');
 const password = ref('');
 
 const visible = ref(false);
+const form = ref();
+const submit = async () => {
+  const { valid } = await form.value.validate();
 
-const submit = () => {
-  authStore.login(username.value, password.value);
+  if (valid) {
+    await authStore.login(username.value, password.value);
+  }
+
+  if (authStore.isAuthenticated) {
+    navigateTo('/');
+  }
 };
+
+onMounted(() => {
+  if (form.value) {
+    form.value.reset();
+    form.value.resetValidation();
+  }
+});
 </script>
 <template>
   <v-container
@@ -29,7 +44,7 @@ const submit = () => {
       <v-card-text class="text-center">
         <p>Login</p>
       </v-card-text>
-      <v-form fast-fail @submit.prevent @submit="submit">
+      <v-form ref="form" fast-fail @submit.prevent @submit="submit">
         <div class="text-subtitle-1 text-medium-emphasis">Username</div>
         <v-text-field
           v-model="username"

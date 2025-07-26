@@ -2,7 +2,6 @@
 import { ref } from 'vue';
 import { useBoardStore } from '~/stores/board';
 import type { Column } from '~/types/Column';
-import type { Task } from '~/types/Task';
 
 const boardStore = useBoardStore();
 const taskInput = ref<Record<number, string>>({});
