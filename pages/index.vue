@@ -1,19 +1,61 @@
 <script setup lang="ts">
-const {
-  columns,
-  addTask,
-  addColumn,
-  columnName,
-  openAddTask,
-  showAddColumn,
-  closeAddTask,
-  removeTask,
-  removeColumn,
-  startDrag,
-  onDrop,
-  closeAddColumn,
-  addNewColumn,
-} = useBoard();
+import { useBoardStore } from '~/stores/board';
+import type { Column } from '~/types/Column';
+const boardStore = useBoardStore();
+const addTask = ref<{ [key: number]: boolean }>({});
+
+function openAddTask(columnId: number) {
+  addTask.value[columnId] = true;
+}
+function closeAddTask(columnId: number) {
+  addTask.value[columnId] = false;
+}
+function showAddColumn() {
+  boardStore.addColumn = true;
+}
+
+function addNewColumn(name: string) {
+  const newColumn: Column = {
+    id: boardStore.columns.length + 1,
+    name,
+    tasks: [],
+  };
+  boardStore.columns.push(newColumn);
+  boardStore.closeAddColumn();
+}
+
+const startDrag = (event: DragEvent, item: any) => {
+  if (event.dataTransfer) {
+    event.dataTransfer.dropEffect = 'move';
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('itemId', item.id.toString());
+
+    const target = event.target as HTMLElement;
+    const clone = target.cloneNode(true) as HTMLElement;
+    clone.style.position = 'absolute';
+    document.body.appendChild(clone);
+    event.dataTransfer.setDragImage(clone, 0, 0);
+  }
+};
+
+const onDrop = (event: DragEvent, targetColumn: Column) => {
+  const itemId = Number(event.dataTransfer?.getData('itemId'));
+  if (!itemId) return;
+
+  let taskToMove: any = null;
+
+  for (const column of boardStore.columns) {
+    const taskIndex = column.tasks.findIndex((task) => task.id === itemId);
+    if (taskIndex !== -1) {
+      taskToMove = column.tasks.splice(taskIndex, 1)[0];
+      break;
+    }
+  }
+
+  if (taskToMove) {
+    targetColumn.tasks.push(taskToMove);
+  }
+};
 </script>
 
 <template>
@@ -30,7 +72,7 @@ const {
 
       <v-row justify="start" class="py-4">
         <v-col
-          v-for="column in columns"
+          v-for="column in boardStore.columns"
           :key="column.id"
           cols="3"
           @drop="onDrop($event, column)"
@@ -69,7 +111,7 @@ const {
                     <v-list-item>
                       <v-list-item-title>Edit</v-list-item-title>
                     </v-list-item>
-                    <v-list-item @click="removeColumn(column.id)">
+                    <v-list-item @click="boardStore.removeColumn(column.id)">
                       <v-list-item-title>Delete</v-list-item-title>
                     </v-list-item>
                     <template #title="slotProps"></template>
@@ -108,10 +150,9 @@ const {
                             size="30"
                           >
                             <v-icon size="16">mdi-pencil</v-icon>
-                            <!-- ปรับขนาดไอคอนตรงนี้ -->
                           </v-btn>
                           <v-btn
-                            @click="removeTask(column.id, item.id)"
+                            @click="boardStore.removeTask(column.id, item.id)"
                             v-if="isHovering"
                             icon="mdi-delete"
                             variant="text"
@@ -207,7 +248,7 @@ const {
             >
           </v-card>
         </v-col>
-        <v-col cols="3" v-if="addColumn">
+        <v-col cols="3" v-if="boardStore.addColumn">
           <v-card
             style="
               border-radius: 10px;
@@ -224,20 +265,20 @@ const {
                   type="text"
                   variant="plain"
                   hide-details
-                  v-model="columnName"
+                  v-model="boardStore.columnName"
                 /></div
             ></v-card-title>
 
             <v-card-actions class="d-flex justify-end">
               <v-btn
-                @click="closeAddColumn()"
+                @click="boardStore.closeAddColumn()"
                 variant="text"
                 class="bg-red-lighten-2"
                 text="ยกเลิก"
               ></v-btn>
 
               <v-btn
-                @click="addNewColumn(columnName)"
+                @click="addNewColumn(boardStore.columnName)"
                 variant="text"
                 class="bg-green-lighten-1"
                 text="บันทึก"
@@ -259,7 +300,7 @@ const {
   background-color: #efefef;
 }
 
-.v-text-field >>> input {
+.v-text-field :deep(.input) {
   font-size: 20px;
   padding: 0px !important;
 }
