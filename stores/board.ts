@@ -93,6 +93,13 @@ export const useBoardStore = defineStore('board', () => {
     allBoards.value.push(newBoard);
   };
 
+  const members = computed(() => {
+    const board = userBoards.value.find(
+      (boardItem) => boardItem.id === selectedBoardId.value
+    );
+    return board ? board.members : [];
+  });
+
   return {
     allBoards,
     userBoards,
@@ -100,6 +107,7 @@ export const useBoardStore = defineStore('board', () => {
     columns,
     addColumn,
     columnName,
+    members,
     findUserIdByEmail,
     closeAddColumn,
     removeTask,

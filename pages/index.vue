@@ -1,7 +1,10 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import { useBoardStore } from '~/stores/board';
 import type { Column } from '~/types/Column';
+
 const boardStore = useBoardStore();
+
 const addTask = ref<{ [key: number]: boolean }>({});
 
 function openAddTask(columnId: number) {
@@ -56,6 +59,26 @@ const onDrop = (event: DragEvent, targetColumn: Column) => {
     targetColumn.tasks.push(taskToMove);
   }
 };
+
+const editingColumnId = ref<number | null>(null);
+const editingName = ref('');
+
+function startEdit(column: Column) {
+  editingColumnId.value = column.id;
+  editingName.value = column.name;
+}
+
+function saveEdit() {
+  if (editingColumnId.value !== null) {
+    const col = boardStore.columns.find((c) => c.id === editingColumnId.value);
+
+    if (col) {
+      col.name = editingName.value.trim() || col.name;
+    }
+    editingColumnId.value = null;
+    editingName.value = '';
+  }
+}
 </script>
 
 <template>
@@ -91,7 +114,20 @@ const onDrop = (event: DragEvent, targetColumn: Column) => {
               style="border-bottom: 1px solid #e0e0e0"
             >
               <div class="d-flex align-center w-100">
-                <div>{{ column.name }} ({{ column.tasks.length }})</div>
+                <div v-if="editingColumnId !== column.id">
+                  {{ column.name }} ({{ column.tasks.length }})
+                </div>
+
+                <v-text-field
+                  v-else
+                  v-model="editingName"
+                  hide-details
+                  density="compact"
+                  type="text"
+                  variant="plain"
+                  @blur="saveEdit"
+                  autofocus
+                />
                 <v-spacer />
                 <v-btn
                   @click="openAddTask(column.id)"
@@ -108,7 +144,7 @@ const onDrop = (event: DragEvent, targetColumn: Column) => {
                   </template>
 
                   <v-list>
-                    <v-list-item>
+                    <v-list-item @click="startEdit(column)">
                       <v-list-item-title>Edit</v-list-item-title>
                     </v-list-item>
                     <v-list-item @click="boardStore.removeColumn(column.id)">
@@ -300,8 +336,8 @@ const onDrop = (event: DragEvent, targetColumn: Column) => {
   background-color: #efefef;
 }
 
-.v-text-field :deep(.input) {
+.v-text-field :deep(input) {
   font-size: 20px;
-  padding: 0px !important;
+  padding: 0 !important;
 }
 </style>

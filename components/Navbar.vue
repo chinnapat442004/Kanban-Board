@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { useAuthStore } from '#imports';
-
 import { useBoardStore } from '~/stores/board';
 import { users } from '~/mock/users';
 const boardStore = useBoardStore();
@@ -56,17 +54,44 @@ const onSubmit = () => {
 
   <v-app-bar flat height="64" color="white" elevation="0">
     <v-toolbar-title>
-      <v-select
-        hide-details
-        :items="boardStore.userBoards"
-        item-title="name"
-        item-value="id"
-        v-model="boardStore.selectedBoardId"
-        density="compact"
-        variant="outlined"
-        class="mr-4"
-        style="max-width: 300px"
-      ></v-select>
+      <div class="d-flex align-center">
+        <v-select
+          hide-details
+          :items="boardStore.userBoards"
+          item-title="name"
+          item-value="id"
+          v-model="boardStore.selectedBoardId"
+          density="compact"
+          variant="outlined"
+          class="mr-2"
+          style="max-width: 280px"
+        ></v-select>
+
+        <v-menu offset-y>
+          <template #activator="{ props }">
+            <v-btn
+              icon
+              variant="text"
+              v-bind="props"
+              class="pa-0"
+              style="min-width: 36px"
+            >
+              <v-icon>mdi-dots-vertical</v-icon>
+            </v-btn>
+          </template>
+
+          <v-list>
+            <v-list-item>
+              <v-list-item-title>Edit</v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title>Delete</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+        <v-icon class="mr-3" size="small" icon="mdi-account-multiple "></v-icon>
+        <div>{{ boardStore.members.length }} member</div>
+      </div>
     </v-toolbar-title>
 
     <v-btn
