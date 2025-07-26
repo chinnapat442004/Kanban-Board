@@ -5,6 +5,8 @@ import { mockBoards } from '~/mock/boards';
 import { useAuthStore } from '#imports';
 import type { Board } from '~/types/Board';
 import { users } from '~/mock/users';
+import type { Column } from '~/types/Column';
+import type { Task } from '~/types/Task';
 
 export const useBoardStore = defineStore('board', () => {
   const authStore = useAuthStore();
@@ -108,6 +110,34 @@ export const useBoardStore = defineStore('board', () => {
     return item;
   });
 
+  function addNewColumn(name: string) {
+    const newColumn: Column = {
+      id: columns.value.length + 1,
+      name,
+      tasks: [],
+    };
+
+    columns.value.push(newColumn);
+    closeAddColumn();
+  }
+
+  function addNewTask(name: string, columnId: number) {
+    if (name) {
+      const allTaskIds = columns.value.flatMap((c) => c.tasks.map((t) => t.id));
+
+      const maxTaskId = allTaskIds.length > 0 ? Math.max(...allTaskIds) : 0;
+
+      const newTask: Task = {
+        id: maxTaskId + 1,
+        title: name,
+        tags: [],
+      };
+
+      const column = columns.value.find((c) => c.id === columnId);
+      column?.tasks.push(newTask);
+    }
+  }
+
   return {
     allBoards,
     userBoards,
@@ -123,5 +153,7 @@ export const useBoardStore = defineStore('board', () => {
     removeTask,
     removeColumn,
     addBoard,
+    addNewColumn,
+    addNewTask,
   };
 });

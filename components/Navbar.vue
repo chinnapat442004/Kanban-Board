@@ -203,7 +203,7 @@ watch(
             type="submit"
             @click=""
           >
-            บันทึก
+            ยืนยัน
           </v-btn>
         </template>
       </v-card>

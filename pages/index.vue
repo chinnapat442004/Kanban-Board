@@ -2,29 +2,41 @@
 import { ref } from 'vue';
 import { useBoardStore } from '~/stores/board';
 import type { Column } from '~/types/Column';
+import type { Task } from '~/types/Task';
 
 const boardStore = useBoardStore();
+const taskInput = ref<Record<number, string>>({});
+const addTask = ref<Record<number, boolean>>({});
 
-const addTask = ref<{ [key: number]: boolean }>({});
+const openAddTask = (columnId: number) => {
+  if (!addTask.value) return;
 
-function openAddTask(columnId: number) {
+  Object.keys(addTask.value).forEach((id) => {
+    addTask.value[Number(id)] = false;
+    taskInput.value[Number(id)] = '';
+  });
+
   addTask.value[columnId] = true;
-}
-function closeAddTask(columnId: number) {
+};
+
+const closeAddTask = (columnId: number) => {
   addTask.value[columnId] = false;
-}
+  taskInput.value[columnId] = '';
+};
+
 function showAddColumn() {
   boardStore.addColumn = true;
 }
 
 function addNewColumn(name: string) {
-  const newColumn: Column = {
-    id: boardStore.columns.length + 1,
-    name,
-    tasks: [],
-  };
-  boardStore.columns.push(newColumn);
-  boardStore.closeAddColumn();
+  boardStore.addNewColumn(name);
+}
+
+function addNewTask(name: string, columnId: number) {
+  if (name) {
+    boardStore.addNewTask(name, columnId);
+    closeAddTask(columnId);
+  }
 }
 
 const startDrag = (event: DragEvent, item: any) => {
@@ -226,6 +238,7 @@ function saveEdit() {
                 <v-card-item>
                   <v-text-field
                     placeholder="เพิ่มชื่อ Task"
+                    v-model="taskInput[column.id]"
                     type="text"
                     variant="plain"
                     hide-details
@@ -261,7 +274,8 @@ function saveEdit() {
                   <v-btn
                     variant="text"
                     class="bg-green-lighten-1"
-                    text="บันทึก"
+                    @click="addNewTask(taskInput[column.id] ?? '', column.id)"
+                    text="ยืนยัน"
                   ></v-btn>
                 </v-card-actions>
               </v-card>
@@ -317,7 +331,7 @@ function saveEdit() {
                 @click="addNewColumn(boardStore.columnName)"
                 variant="text"
                 class="bg-green-lighten-1"
-                text="บันทึก"
+                text="ยืนยัน"
               ></v-btn>
             </v-card-actions> </v-card
         ></v-col>
