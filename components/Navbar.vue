@@ -2,9 +2,10 @@
 import { useBoardStore } from '~/stores/board';
 import { users } from '~/mock/users';
 const boardStore = useBoardStore();
-const dialog = ref(false);
-const authStore = useAuthStore();
 
+const authStore = useAuthStore();
+const dialog = ref(false);
+const deleteDialog = ref(false);
 const name = ref('');
 const emails = ref<string[]>(['']);
 
@@ -25,6 +26,23 @@ const onSubmit = () => {
   name.value = '';
   emails.value = [''];
 };
+const deleteBoard = (boardId: number) => {
+  boardStore.removeBoard(boardId);
+  deleteDialog.value = false;
+};
+
+watch(
+  () => boardStore.userBoards,
+  (boards) => {
+    const selectedId = boardStore.selectedBoardId;
+    const exists = boards.some((b) => b.id === selectedId);
+
+    if (!exists) {
+      boardStore.selectedBoardId = boards.length > 0 ? boards[0]!.id : null;
+    }
+  },
+  { immediate: true, deep: true }
+);
 </script>
 
 <template>
@@ -84,7 +102,7 @@ const onSubmit = () => {
             <v-list-item>
               <v-list-item-title>Edit</v-list-item-title>
             </v-list-item>
-            <v-list-item>
+            <v-list-item @click="deleteDialog = true">
               <v-list-item-title>Delete</v-list-item-title>
             </v-list-item>
           </v-list>
@@ -179,11 +197,43 @@ const onSubmit = () => {
             ยกเลิก
           </v-btn>
 
-          <v-btn variant="text" class="bg-green-lighten-1" type="submit">
+          <v-btn
+            variant="text"
+            class="bg-green-lighten-1"
+            type="submit"
+            @click=""
+          >
             บันทึก
           </v-btn>
         </template>
       </v-card>
     </v-form>
+  </v-dialog>
+
+  <v-dialog v-model="deleteDialog" max-width="600">
+    <v-card rounded="lg">
+      <template #title>
+        <span>คุณต้องการลบ {{ boardStore.board?.name }} ใช่หรือไม่ </span>
+      </template>
+
+      <template v-slot:actions>
+        <v-btn
+          variant="text"
+          class="bg-red-lighten-2"
+          @click="deleteDialog = false"
+        >
+          ยกเลิก
+        </v-btn>
+
+        <v-btn
+          variant="text"
+          class="bg-green-lighten-1"
+          type="submit"
+          @click="deleteBoard(boardStore.board!.id)"
+        >
+          บันทึก
+        </v-btn>
+      </template>
+    </v-card>
   </v-dialog>
 </template>

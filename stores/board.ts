@@ -8,11 +8,8 @@ import { users } from '~/mock/users';
 
 export const useBoardStore = defineStore('board', () => {
   const authStore = useAuthStore();
-
   const allBoards = ref<Board[]>([...mockBoards]);
-
   const selectedBoardId = ref<number | null>(null);
-
   const addColumn = ref(false);
   const columnName = ref('');
 
@@ -43,6 +40,10 @@ export const useBoardStore = defineStore('board', () => {
       column.tasks = column.tasks.filter((task) => task.id !== taskId);
     }
   }
+
+  const removeBoard = (boardId: number) => {
+    allBoards.value = allBoards.value.filter((board) => board.id !== boardId);
+  };
 
   function removeColumn(columnId: number) {
     columns.value = columns.value.filter((c) => c.id !== columnId);
@@ -100,6 +101,13 @@ export const useBoardStore = defineStore('board', () => {
     return board ? board.members : [];
   });
 
+  const board = computed(() => {
+    const item = userBoards.value.find(
+      (boardItem) => boardItem.id === selectedBoardId.value
+    );
+    return item;
+  });
+
   return {
     allBoards,
     userBoards,
@@ -108,6 +116,8 @@ export const useBoardStore = defineStore('board', () => {
     addColumn,
     columnName,
     members,
+    board,
+    removeBoard,
     findUserIdByEmail,
     closeAddColumn,
     removeTask,
