@@ -120,7 +120,12 @@ export const useBoardStore = defineStore('board', () => {
     closeAddColumn();
   }
 
-  function addNewTask(name: string, columnId: number) {
+  function addNewTask(
+    name: string,
+    tags: string[],
+    responsiblePersons: number[],
+    columnId: number
+  ) {
     if (name) {
       const allTaskIds = columns.value.flatMap((c) => c.tasks.map((t) => t.id));
 
@@ -129,10 +134,12 @@ export const useBoardStore = defineStore('board', () => {
       const newTask: Task = {
         id: maxTaskId + 1,
         title: name,
-        tags: [],
+        tags: tags,
+        responsiblePersons: responsiblePersons,
       };
 
       const column = columns.value.find((c) => c.id === columnId);
+
       column?.tasks.push(newTask);
     }
   }

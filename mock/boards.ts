@@ -10,14 +10,31 @@ export const mockBoards: Board[] = [
       {
         id: 1,
         name: 'To Do',
-        tasks: [{ id: 1, title: 'Design Homepage', tags: ['UI', 'UX'] }],
+        tasks: [
+          {
+            id: 1,
+            title: 'Design Homepage',
+            tags: ['UI', 'UX'],
+            responsiblePersons: [1, 2],
+          },
+        ],
       },
       {
         id: 2,
         name: 'In Progress',
         tasks: [
-          { id: 2, title: 'Setup Database', tags: ['DB'] },
-          { id: 3, title: 'Create API Endpoints', tags: ['Backend'] },
+          {
+            id: 2,
+            title: 'Setup Database',
+            tags: ['DB'],
+            responsiblePersons: [],
+          },
+          {
+            id: 3,
+            title: 'Create API Endpoints',
+            tags: ['Backend'],
+            responsiblePersons: [1, 2],
+          },
         ],
       },
     ],
@@ -31,7 +48,14 @@ export const mockBoards: Board[] = [
       {
         id: 1,
         name: 'In Progress',
-        tasks: [{ id: 2, title: 'Setup Database', tags: ['DB'] }],
+        tasks: [
+          {
+            id: 2,
+            title: 'Setup Database',
+            tags: ['DB'],
+            responsiblePersons: [],
+          },
+        ],
       },
     ],
   },

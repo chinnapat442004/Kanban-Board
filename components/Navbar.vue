@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useBoardStore } from '~/stores/board';
 import { users } from '~/mock/users';
+import type { Task } from '~/types/Task';
 const boardStore = useBoardStore();
 const authStore = useAuthStore();
 const dialog = ref(false);
@@ -9,6 +10,8 @@ const editDialog = ref(false);
 const name = ref('');
 const editedNnameBoard = ref(boardStore.board?.name || '');
 const editedMembers = ref<number[]>([]);
+const emails = ref<string[]>(['']);
+const editEmails = ref<string[]>(['']);
 
 watch(
   () => editDialog.value,
@@ -28,9 +31,6 @@ watch(
   },
   { immediate: true }
 );
-
-const emails = ref<string[]>(['']);
-const editEmails = ref<string[]>(['']);
 
 onMounted(() => {
   authStore.getUser();
@@ -110,9 +110,7 @@ const canAddEmail = computed(() => {
   });
 });
 
-const canConfirm = computed(() => {
-  return canAddEmail.value;
-});
+const editedTask = ref<Task | null>(null);
 </script>
 
 <template>
