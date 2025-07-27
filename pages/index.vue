@@ -599,6 +599,8 @@ function showAddColumn() {
                 prepend-icon="mdi-plus"
                 class="mb-4 bg-blue-lighten-3 font-weight-medium"
                 style="border-radius: 10px; height: 40px; max-width: 100%"
+                variant="flat"
+                block
               >
                 Add Task
               </v-btn>

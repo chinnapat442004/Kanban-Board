@@ -121,6 +121,10 @@ const editedTask = ref<Task | null>(null);
   >
     <v-toolbar-title>Kanban Board</v-toolbar-title>
 
+    <v-btn icon variant="text" class="pa-0" style="min-width: 36px">
+      <v-icon>mdi-bell</v-icon>
+    </v-btn>
+
     <span class="text-h6 mr-4">{{ authStore.userLogin?.username }}</span>
 
     <v-menu transition="slide-y-transition" open-on-hover>
