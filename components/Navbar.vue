@@ -2,12 +2,35 @@
 import { useBoardStore } from '~/stores/board';
 import { users } from '~/mock/users';
 const boardStore = useBoardStore();
-
 const authStore = useAuthStore();
 const dialog = ref(false);
 const deleteDialog = ref(false);
+const editDialog = ref(false);
 const name = ref('');
+const editedNnameBoard = ref(boardStore.board?.name || '');
+const editedMembers = ref<number[]>([]);
+
+watch(
+  () => editDialog.value,
+  (val) => {
+    if (val && boardStore.board?.members) {
+      editedMembers.value = [...boardStore.board.members];
+    }
+  }
+);
+
+watch(
+  () => boardStore.board,
+  (newBoard) => {
+    if (newBoard?.name) {
+      editedNnameBoard.value = newBoard.name;
+    }
+  },
+  { immediate: true }
+);
+
 const emails = ref<string[]>(['']);
+const editEmails = ref<string[]>(['']);
 
 onMounted(() => {
   authStore.getUser();
@@ -43,6 +66,53 @@ watch(
   },
   { immediate: true, deep: true }
 );
+
+const addNewMembers = () => {
+  const newMemberIds = editEmails.value
+    .map((email) => boardStore.findUserIdByEmail(email.trim()))
+    .filter((id): id is number => !!id);
+
+  const uniqueNewMembers = newMemberIds.filter(
+    (id) => !editedMembers.value.includes(id)
+  );
+
+  editedMembers.value = [...editedMembers.value, ...uniqueNewMembers];
+
+  editEmails.value = [''];
+};
+
+const closeAddNewMenbers = () => {
+  editDialog.value = false;
+  editEmails.value = [''];
+};
+
+const confirmEditBoard = () => {
+  if (boardStore.board) {
+    addNewMembers();
+
+    boardStore.board.name = editedNnameBoard.value;
+    boardStore.board.members = [...editedMembers.value];
+  }
+  editDialog.value = false;
+};
+
+const canAddEditEmail = computed(() => {
+  return editEmails.value.every((email) => {
+    if (!email || email.trim() === '') return false;
+    return users.some((u) => u.email === email.trim());
+  });
+});
+
+const canAddEmail = computed(() => {
+  return emails.value.every((email) => {
+    if (!email || email.trim() === '') return false;
+    return users.some((u) => u.email === email.trim());
+  });
+});
+
+const canConfirm = computed(() => {
+  return canAddEmail.value;
+});
 </script>
 
 <template>
@@ -99,7 +169,7 @@ watch(
           </template>
 
           <v-list>
-            <v-list-item>
+            <v-list-item @click="editDialog = true">
               <v-list-item-title>Edit</v-list-item-title>
             </v-list-item>
             <v-list-item @click="deleteDialog = true">
@@ -180,7 +250,8 @@ watch(
                 size="small"
                 prepend-icon="mdi-plus"
                 class="bg-blue-lighten-3"
-                @click="emails.push('')"
+                @click="editEmails.push('')"
+                :disabled="!canAddEmail"
               >
                 เพิ่มอีเมล
               </v-btn>
@@ -235,5 +306,148 @@ watch(
         </v-btn>
       </template>
     </v-card>
+  </v-dialog>
+
+  <v-dialog v-model="editDialog" max-width="600">
+    <v-form fast-fail @submit.prevent="onSubmit">
+      <v-card rounded="lg">
+        <template #title>
+          <span style="font-weight: 700">แก้ไข Board</span>
+        </template>
+
+        <v-card-text>
+          <v-row dense>
+            <v-col cols="12">
+              <div class="text-subtitle-1 mb-2">ชื่อ Board</div>
+              <v-text-field
+                placeholder="ชื่อ Board"
+                required
+                variant="outlined"
+                v-model="editedNnameBoard"
+                :rules="[(v) => !!v || 'กรุณากรอกชื่อ Board']"
+              ></v-text-field>
+            </v-col>
+
+            <v-col cols="12">
+              <div class="text-subtitle-1 mb-2">สมาชิก</div>
+
+              <v-list>
+                <v-list-item
+                  v-for="(emailItem, index) in editedMembers"
+                  :key="index"
+                  rounded="md"
+                  prepend-icon="mdi-account"
+                  style="background-color: #f8f9fb"
+                >
+                  <v-list-item-content
+                    class="d-flex align-center justify-space-between"
+                  >
+                    <div class="d-flex align-center">
+                      <span class="mr-2">{{
+                        boardStore.getUserById(emailItem)?.username
+                      }}</span>
+
+                      <div class="ml-0 ml-sm-3">
+                        <v-chip
+                          variant="outlined"
+                          color="grey-darken-1"
+                          size="small"
+                          prepend-icon="mdi-email-outline"
+                          class="text-caption"
+                        >
+                          {{ boardStore.getUserById(emailItem)?.email }}
+                        </v-chip>
+                      </div>
+                      <v-chip
+                        v-if="boardStore.board?.ownerId === emailItem"
+                        size="x-small"
+                        class="ml-2"
+                      >
+                        เจ้าของ
+                      </v-chip>
+                    </div>
+
+                    <v-btn
+                      v-if="boardStore.board?.ownerId !== emailItem"
+                      icon
+                      variant="text"
+                      color="red"
+                      size="small"
+                      @click="editedMembers.splice(index, 1)"
+                    >
+                      <v-icon>mdi-delete</v-icon>
+                    </v-btn>
+                  </v-list-item-content>
+                </v-list-item>
+              </v-list>
+
+              <div class="text-subtitle-1 font-weight-medium mb-2 mt-5">
+                เพิ่มสมาชิกใหม่ (email)
+              </div>
+
+              <div
+                v-for="(emailItem, index) in editEmails"
+                :key="index"
+                class="d-flex mb-2 align-center"
+              >
+                <v-text-field
+                  v-model="editEmails[index]"
+                  placeholder="กรอก email"
+                  variant="outlined"
+                  dense
+                  class="flex-grow-1 mr-2"
+                  :rules="[
+                    (v) => {
+                      if (!v || v.trim() === '') return true;
+                      return users.some((u) => u.email === v.trim())
+                        ? true
+                        : 'อีเมลนี้ไม่มีในระบบ';
+                    },
+                  ]"
+                />
+
+                <v-btn
+                  v-if="editEmails.length > 1"
+                  @click="editEmails.splice(index, 1)"
+                  size="small"
+                  color="red"
+                  icon="mdi-close"
+                  variant="text"
+                ></v-btn>
+              </div>
+              <v-btn
+                variant="text"
+                size="small"
+                prepend-icon="mdi-plus"
+                class="bg-blue-lighten-3"
+                @click="editEmails.push('')"
+                :disabled="!canAddEditEmail"
+              >
+                เพิ่มอีเมล
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-card-text>
+
+        <template v-slot:actions>
+          <v-btn
+            variant="text"
+            class="bg-red-lighten-2"
+            @click="closeAddNewMenbers"
+          >
+            ยกเลิก
+          </v-btn>
+
+          <v-btn
+            variant="text"
+            class="bg-green-lighten-1"
+            type="submit"
+            @click="confirmEditBoard"
+          >
+            ยืนยัน
+          </v-btn>
+        </template>
+      </v-card>
+    </v-form>
   </v-dialog>
 </template>

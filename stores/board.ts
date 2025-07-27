@@ -74,7 +74,6 @@ export const useBoardStore = defineStore('board', () => {
   }
 
   const findUserIdByEmail = (email: string): number | null => {
-    console.log(email);
     const user = users.find((u) => u.email === email.trim());
     return user ? user.id : null;
   };
@@ -138,6 +137,10 @@ export const useBoardStore = defineStore('board', () => {
     }
   }
 
+  const getUserById = (id: number) => {
+    return users.find((user) => user.id === id);
+  };
+
   return {
     allBoards,
     userBoards,
@@ -155,5 +158,6 @@ export const useBoardStore = defineStore('board', () => {
     addBoard,
     addNewColumn,
     addNewTask,
+    getUserById,
   };
 });
