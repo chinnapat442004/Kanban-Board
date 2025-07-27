@@ -23,6 +23,9 @@ const editingTags = ref<string[]>([]);
 const editingResponsiblePersons = ref<number[]>([]);
 const editTaskDialog = ref(false);
 
+const editingColumnId = ref<number | null>(null);
+const editingName = ref('');
+
 function startEditTask(task: Task) {
   editingTask.value = { ...task };
   editingTaskInput.value = task.title;
@@ -191,8 +194,9 @@ const onDrop = (event: DragEvent, targetColumn: Column) => {
   }
 };
 
-const editingColumnId = ref<number | null>(null);
-const editingName = ref('');
+function addNewColumn(name: string) {
+  boardStore.addNewColumn(name);
+}
 
 function startEdit(column: Column) {
   editingColumnId.value = column.id;
@@ -607,6 +611,44 @@ function showAddColumn() {
             </template>
           </v-card>
         </v-col>
+
+        <v-col cols="3" v-if="boardStore.addColumn">
+          <v-card
+            style="
+              border-radius: 10px;
+              box-shadow: none;
+              border: 1px solid #e0e0e0;
+            "
+            ><v-card-title
+              class="d-flex flex-column align-start"
+              style="border-bottom: 1px solid #e0e0e0"
+            >
+              <div class="d-flex align-center w-100">
+                <v-text-field
+                  placeholder="เพิ่มคอลัมน์ใหม่"
+                  type="text"
+                  variant="plain"
+                  hide-details
+                  v-model="boardStore.columnName"
+                /></div
+            ></v-card-title>
+
+            <v-card-actions class="d-flex justify-end">
+              <v-btn
+                @click="boardStore.closeAddColumn()"
+                variant="text"
+                class="bg-red-lighten-2"
+                text="ยกเลิก"
+              ></v-btn>
+
+              <v-btn
+                @click="addNewColumn(boardStore.columnName)"
+                variant="text"
+                class="bg-green-lighten-1"
+                text="ยืนยัน"
+              ></v-btn>
+            </v-card-actions> </v-card
+        ></v-col>
       </v-row>
     </div>
   </v-main>
